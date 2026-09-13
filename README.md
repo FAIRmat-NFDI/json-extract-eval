@@ -140,10 +140,16 @@ Run-level metrics (`mean_precision`, `mean_recall`, `mean_f1`) are the arithmeti
 **Important:** By default, all gold fields must be defined in the eval schema, so the evaluator knows
 how to score them. A gold instance can omit a field that is in the schema (it simply won't
 be scored for that record). `validate_gold()` raises an error if gold has fields not in
-the schema.
-Pass `allow_extra_fields=True` to `validate_gold()` when gold records intentionally carry
+the schema. Pass `allow_extra_fields=True` to `validate_gold()` when gold records intentionally carry
 unscored metadata. Those fields remain visible with `status="skipped"` and a diagnostic
 reason, whether or not the extractor also returned them.
+Property names containing `.` are rejected because dots separate nested field
+paths in evaluation output. Gold property names are checked during the existing
+schema traversal, before reporting an unknown field; comparator-owned values
+remain opaque to structural validation.
+
+
+
 
 ---
 

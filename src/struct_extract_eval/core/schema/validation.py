@@ -65,7 +65,6 @@ class GoldValidationError(Exception):
         super().__init__(message)
 
 
-
 def validate_gold(
     gold: list[dict[str, object]],
     schema: dict[str, object],
@@ -235,6 +234,16 @@ def _validate_node(
 
         skip = ignore_keys or set()
         for key in gold_value:
+            if isinstance(key, str) and "." in key:
+                path = f"{node.path}.{key}" if node.path else key
+                location = node.path or "<root>"
+                raise GoldValidationError(
+                    f"Record {record_id!r}: {location}: property name {key!r} "
+                    "contains '.', which is reserved as the path separator. "
+                    "Rename the key.",
+                    record_id=record_id,
+                    path=path,
+                )
             if key not in schema_fields and key not in skip:
                 path = f"{node.path}.{key}" if node.path else key
                 if allow_extra_fields:

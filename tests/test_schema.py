@@ -26,6 +26,36 @@ class TestSchemaError:
         assert str(err) == "steps[].duration: bad type"
         assert err.path == "steps[].duration"
 
+    def test_dotted_property_name_is_rejected_at_root(self) -> None:
+        schema = {
+            "type": "object",
+            "properties": {
+                "x.y": {"type": "string", "x-eval-compare": "exact"},
+            },
+        }
+
+        with pytest.raises(SchemaError, match=r"property name 'x\.y' contains '\.'"):
+            parse_eval_schema(schema)
+
+    def test_dotted_property_name_reports_parent_path(self) -> None:
+        schema = {
+            "type": "object",
+            "properties": {
+                "parent": {
+                    "type": "object",
+                    "properties": {
+                        "x.y": {"type": "string", "x-eval-compare": "exact"},
+                    },
+                },
+            },
+        }
+
+        with pytest.raises(SchemaError) as exc_info:
+            parse_eval_schema(schema)
+
+        assert exc_info.value.path == "parent"
+        assert str(exc_info.value).startswith("parent: property name 'x.y'")
+
 
 # --- SchemaNode ---
 

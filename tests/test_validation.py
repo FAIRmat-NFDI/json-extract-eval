@@ -221,6 +221,36 @@ class TestValidateGold:
                 [{"person": {"name": "Alice", "age": 30}}], schema
             )
 
+    def test_dotted_extra_gold_field_has_precise_error(self) -> None:
+        schema = _eval_schema({
+            "type": "object",
+            "properties": {"name": {"type": "string"}},
+        })
+
+        with pytest.raises(GoldValidationError) as exc_info:
+            validate_gold([{"name": "Alice", "x.y": "bad"}], schema)
+
+        assert exc_info.value.path == "x.y"
+        assert "property name 'x.y' contains '.'" in str(exc_info.value)
+        assert "not in schema" not in str(exc_info.value)
+
+    def test_nested_dotted_gold_field_reports_parent(self) -> None:
+        schema = _eval_schema({
+            "type": "object",
+            "properties": {
+                "person": {
+                    "type": "object",
+                    "properties": {"name": {"type": "string"}},
+                },
+            },
+        })
+
+        with pytest.raises(GoldValidationError) as exc_info:
+            validate_gold([{"person": {"name": "Alice", "contact.email": "a@b"}}], schema)
+
+        assert exc_info.value.path == "person.contact.email"
+        assert "person: property name 'contact.email' contains '.'" in str(exc_info.value)
+
     def test_id_field_not_in_schema_does_not_raise(self) -> None:
         """id_field is excluded from extra-key check."""
         schema = _eval_schema({

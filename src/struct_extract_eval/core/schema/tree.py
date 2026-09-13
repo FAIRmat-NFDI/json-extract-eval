@@ -284,6 +284,16 @@ def _build_node(schema: dict[str, object], path: str, name: str = "") -> SchemaN
     """Recursively build a SchemaNode tree from a resolved eval schema."""
     _validate_xeval(schema, path)
 
+    properties = schema.get("properties")
+    if isinstance(properties, dict):
+        for property_name in properties:
+            if isinstance(property_name, str) and "." in property_name:
+                raise SchemaError(
+                    f"property name {property_name!r} contains '.', which is reserved "
+                    "as the path separator. Rename the key.",
+                    path,
+                )
+
     json_type = resolve_type(schema)
     if json_type is None:
         raise SchemaError("Missing or invalid 'type'", path)
