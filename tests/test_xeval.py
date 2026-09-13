@@ -328,3 +328,21 @@ class TestAnnotateXeval:
         }
         annotate_xeval(schema)
         assert "x-eval-compare" not in schema["properties"]["tags"]  # type: ignore[index]
+
+
+def test_annotate_does_not_descend_under_node_with_comparator() -> None:
+    raw: dict[str, object] = {
+        "type": "object",
+        "properties": {
+            "person": {
+                "type": "object",
+                "x-eval-compare": "exact",
+                "properties": {"surname": {"type": "string"}},
+            },
+            "plain": {"type": "string"},
+        },
+    }
+    annotate_xeval(raw)
+    person = raw["properties"]["person"]  # type: ignore[index]
+    assert "x-eval-compare" not in person["properties"]["surname"]  # type: ignore[index]
+    assert raw["properties"]["plain"]["x-eval-compare"] == "exact"  # type: ignore[index]

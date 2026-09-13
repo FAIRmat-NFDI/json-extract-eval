@@ -277,9 +277,10 @@ class TestParseSchema:
         assert node.comparator.params == {"tolerance": {"rel": 0.05}}
 
     def test_missing_xeval_compare_raises(self) -> None:
+        # No comparator on the parent: the leaf is scored on its own and must
+        # carry one. (A parent with x-eval-compare would make the leaf exempt.)
         schema: dict[str, object] = {
             "type": "object",
-            "x-eval-compare": "exact",
             "properties": {
                 "name": {"type": "string"},
             },
@@ -583,3 +584,61 @@ class TestListValuedType:
             "properties": {"x": {"type": ["string", "object"], "x-eval-compare": "exact"}},
         })
         assert tree.children[0].comparator.name == "exact"
+
+
+# --- Children of a node that has its own comparator ---
+
+
+class TestChildrenUnderNodeComparator:
+    def test_bare_leaves_under_object_comparator_parse(self) -> None:
+        # No annotate_xeval: the inner leaves have no comparator at all.
+        raw: dict[str, object] = {
+            "type": "object",
+            "properties": {
+                "person": {
+                    "type": "object",
+                    "x-eval-compare": "exact",
+                    "properties": {"surname": {"type": "string"}, "name": {"type": "string"}},
+                },
+            },
+        }
+        person = parse_eval_schema(raw).children[0]
+        assert person.comparator.name == "exact"
+        assert [c.comparator.name for c in person.children] == ["", ""]
+
+    def test_bare_leaves_nested_deeper_also_parse(self) -> None:
+        raw: dict[str, object] = {
+            "type": "object",
+            "properties": {
+                "person": {
+                    "type": "object",
+                    "x-eval-compare": "exact",
+                    "properties": {
+                        "full_name": {
+                            "type": "object",
+                            "properties": {"surname": {"type": "string"}},
+                        },
+                    },
+                },
+            },
+        }
+        parse_eval_schema(raw)
+
+    def test_bare_items_under_array_comparator_parse(self) -> None:
+        raw: dict[str, object] = {
+            "type": "object",
+            "properties": {
+                "tags": {"type": "array", "x-eval-compare": "exact", "items": {"type": "string"}},
+            },
+        }
+        parse_eval_schema(raw)
+
+    def test_bare_leaves_under_plain_object_still_raise(self) -> None:
+        raw: dict[str, object] = {
+            "type": "object",
+            "properties": {
+                "person": {"type": "object", "properties": {"surname": {"type": "string"}}},
+            },
+        }
+        with pytest.raises(SchemaError, match="missing x-eval-compare"):
+            parse_eval_schema(raw)

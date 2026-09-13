@@ -234,18 +234,20 @@ def _validate_xeval(schema: dict[str, object], path: str) -> None:
 
 
 def _resolve_comparator_spec(
-    schema: dict[str, object], path: str
+    schema: dict[str, object], path: str, required: bool = True
 ) -> ComparatorSpec:
     """Build a ComparatorSpec from x-eval-compare.
 
-    Raises SchemaError if x-eval-compare is missing on a non-skip leaf node.
+    Raises SchemaError if x-eval-compare is missing on a non-skip leaf node,
+    unless ``required`` is False: a leaf below a node that has its own
+    comparator is never compared, so it needs no comparator of its own.
     Non-leaf nodes without x-eval-compare get an empty placeholder
     since container nodes are scored via their children, not directly.
     Skip nodes without x-eval-compare get an empty placeholder since
     the comparator is never called.
     """
     if "x-eval-compare" not in schema:
-        if is_leaf(schema) and not schema.get("x-eval-skip"):
+        if required and is_leaf(schema) and not schema.get("x-eval-skip"):
             raise SchemaError(
                 "missing x-eval-compare -- run annotate_xeval first", path
             )
@@ -280,8 +282,15 @@ def _resolve_transform_specs(
     return specs
 
 
-def _build_node(schema: dict[str, object], path: str, name: str = "") -> SchemaNode:
-    """Recursively build a SchemaNode tree from a resolved eval schema."""
+def _build_node(
+    schema: dict[str, object], path: str, name: str = "", scored_by_ancestor: bool = False
+) -> SchemaNode:
+    """Recursively build a SchemaNode tree from a resolved eval schema.
+
+    ``scored_by_ancestor`` is True below a node that has its own
+    ``x-eval-compare``. Such a node is scored as one unit, so nothing under it
+    is ever compared and its leaves are not required to carry a comparator.
+    """
     _validate_xeval(schema, path)
 
     properties = schema.get("properties")
@@ -301,11 +310,12 @@ def _build_node(schema: dict[str, object], path: str, name: str = "") -> SchemaN
     non_null = non_null_types(schema.get("type"))
     allowed_types: list[str] | None = non_null if len(non_null) >= 2 else None
 
-    comparator = _resolve_comparator_spec(schema, path)
+    comparator = _resolve_comparator_spec(schema, path, required=not scored_by_ancestor)
     transforms = _resolve_transform_specs(schema, path)
 
+    below_comparator = scored_by_ancestor or "x-eval-compare" in schema
     children = [
-        _build_node(child_schema, child_path, child_name)
+        _build_node(child_schema, child_path, child_name, below_comparator)
         for child_name, child_schema, child_path in get_children(schema, path)
     ]
 
