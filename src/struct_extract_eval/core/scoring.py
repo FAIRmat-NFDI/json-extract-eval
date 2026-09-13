@@ -701,6 +701,11 @@ def _one_sided_results(
     """
     if node.skip:
         return []
+    # A node with its own comparator is one field whether it is present or
+    # absent. Emit a single result instead of expanding its children, so a
+    # missing object costs the same as a wrong one (1, not N leaves).
+    if node.comparator.name:
+        return [_one_sided_result(node, value, status, comparator=node.comparator.name)]
     side = "gold" if status == "omission" else "extracted"
 
     # Every child of the node gets the same one-sided status.

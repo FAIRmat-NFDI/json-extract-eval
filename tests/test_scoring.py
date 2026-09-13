@@ -1553,3 +1553,56 @@ class TestOneSidedWalk:
             results = score_record(_meta_schema(), {}, {"meta": "oops"})
         assert results == []
         assert "Expected dict at 'meta', got str in extracted" in caplog.text
+
+
+# --- A node with its own comparator is one field, present or absent ---
+
+
+def _person_with_comparator() -> "SchemaNode":  # noqa: F821
+    return _make_schema({
+        "type": "object",
+        "properties": {
+            "person": {
+                "type": "object",
+                "x-eval-compare": "exact",
+                "properties": {
+                    "surname": {"type": "string"},
+                    "name": {"type": "string"},
+                    "gender": {"type": "string"},
+                },
+            },
+        },
+    })
+
+
+_PERSON_VALUE: dict[str, object] = {"surname": "Smith", "name": "John", "gender": "m"}
+
+
+class TestNodeComparatorOneSided:
+    P = _PERSON_VALUE
+
+    def test_present_on_both_sides_is_one_result(self) -> None:
+        results = score_record(
+            _person_with_comparator(), {"person": self.P}, {"person": dict(self.P, name="Jane")}
+        )
+        assert [(r.path, r.status) for r in results] == [("person", "mismatch")]
+
+    def test_missing_from_extracted_is_one_omission(self) -> None:
+        results = score_record(_person_with_comparator(), {"person": self.P}, {})
+        assert [(r.path, r.status) for r in results] == [("person", "omission")]
+        assert results[0].gold_value == self.P
+
+    def test_missing_from_gold_is_one_hallucination(self) -> None:
+        results = score_record(_person_with_comparator(), {}, {"person": self.P})
+        assert [(r.path, r.status) for r in results] == [("person", "hallucination")]
+        assert results[0].extracted_value == self.P
+
+    def test_array_with_comparator_missing_is_one_omission(self) -> None:
+        schema = _make_schema({
+            "type": "object",
+            "properties": {
+                "tags": {"type": "array", "x-eval-compare": "exact", "items": {"type": "string"}},
+            },
+        })
+        results = score_record(schema, {"tags": ["a", "b"]}, {})
+        assert [(r.path, r.status) for r in results] == [("tags", "omission")]
