@@ -200,13 +200,12 @@ def _score_array_ordered(
     extracted_value: object,
 ) -> list[FieldResult]:
     """Score an array node using ordered (positional) matching."""
-    # _score_node guarantees both sides are real lists before dispatching.
+
     assert isinstance(gold_value, list) and isinstance(extracted_value, list)
     gold_list: list[object] = gold_value
     extracted_list: list[object] = extracted_value
     items_node = node.children[0]
 
-    # Both empty lists: array-level match
     if len(gold_list) == 0 and len(extracted_list) == 0:
         return [FieldResult(
             path=node.path,
@@ -294,7 +293,7 @@ def _score_array_hungarian(
     if n * m > _MAX_HUNGARIAN_PAIRS:
         logger.warning(
             "Array at '%s' has %d x %d = %d pairs, exceeding "
-            "Hungarian threshold (%d)",
+            "Hungarian threshold (%d), falling back to ordered matching. ",
             node.path, n, m, n * m, _MAX_HUNGARIAN_PAIRS,
         )
         return _score_array_ordered(node, gold_value, extracted_value)
@@ -335,7 +334,7 @@ def _score_array_hungarian(
     for i, g in enumerate(gold_list):
         for j, e in enumerate(extracted_list):
             pair_results = _score_node(items_node, g, e)
-            results_matrix[i][j] = pair_results
+            results_matrix[i][j] = pair_results # fieldResult of pari i,j
             if not has_pending and any(r.status == "pending" for r in pair_results):
                 has_pending = True
 
@@ -407,12 +406,15 @@ def _score_array_matched_by_key_field(
 ) -> list[FieldResult]:
     """Score an array using key-field alignment.
 
-    Matches gold and extracted elements by the value of a shared key field
-    (e.g. "name"). Order doesn't matter. Elements with the same key value
-    are paired and scored recursively. Unmatched gold elements produce
+    Matches gold and extracted elements by the value of a shared key field.
+     Order doesn't matter. Elements with the same key value
+    are paired and scored recursively. Duplicate keys in extracted: first
+     occurrence （position in the original list) wins the match，
+      subsequent duplicates are treated as
+     unmatched (hallucinations) Unmatched gold elements produce
     omissions; unmatched extracted elements produce hallucinations.
     """
-    # _score_node guarantees both sides are real lists before dispatching.
+
     assert isinstance(gold_value, list) and isinstance(extracted_value, list)
     gold_list: list[object] = gold_value
     extracted_list: list[object] = extracted_value
@@ -420,7 +422,7 @@ def _score_array_matched_by_key_field(
 
     results: list[FieldResult] = []
 
-    # Both empty lists: array-level match
+
     if len(gold_list) == 0 and len(extracted_list) == 0:
         return [FieldResult(
             path=node.path,

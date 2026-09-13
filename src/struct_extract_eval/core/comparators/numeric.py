@@ -44,7 +44,7 @@ def compare_numeric(gold: Any, extracted: Any, params: dict[str, Any]) -> Compar
         return ComparatorResult(
             score=0.0,
             comparator="numeric",
-            reason="values differ without tolerance",
+            reason="values differ",
         )
 
     diff = abs(gold_f - extracted_f)

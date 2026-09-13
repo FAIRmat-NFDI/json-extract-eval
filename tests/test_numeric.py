@@ -12,7 +12,7 @@ def test_exact_match() -> None:
 def test_exact_mismatch() -> None:
     result = compare_numeric(42.0, 42.1, {})
     assert result.score == 0.0
-    assert result.reason == "values differ without tolerance"
+    assert result.reason == "values differ"
 
 
 def test_relative_tolerance_pass() -> None:
