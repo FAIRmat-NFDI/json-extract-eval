@@ -334,7 +334,9 @@ def _score_array_hungarian(
     for i, g in enumerate(gold_list):
         for j, e in enumerate(extracted_list):
             pair_results = _score_node(items_node, g, e)
-            results_matrix[i][j] = pair_results # fieldResult of pari i,j
+            # Cache the per-field results for pair (i, j) so the chosen
+            # assignment can be emitted without re-scoring.
+            results_matrix[i][j] = pair_results
             if not has_pending and any(r.status == "pending" for r in pair_results):
                 has_pending = True
 
@@ -407,12 +409,13 @@ def _score_array_matched_by_key_field(
     """Score an array using key-field alignment.
 
     Matches gold and extracted elements by the value of a shared key field.
-     Order doesn't matter. Elements with the same key value
-    are paired and scored recursively. Duplicate keys in extracted: first
-     occurrence （position in the original list) wins the match，
-      subsequent duplicates are treated as
-     unmatched (hallucinations) Unmatched gold elements produce
-    omissions; unmatched extracted elements produce hallucinations.
+    Order doesn't matter. Elements with the same key value are paired and
+    scored recursively. Unmatched gold elements produce omissions; unmatched
+    extracted elements produce hallucinations.
+
+    Duplicate keys on the extracted side: the first occurrence (by position
+    in the original list) wins the match. Later duplicates are treated as
+    unmatched and reported as hallucinations.
     """
 
     assert isinstance(gold_value, list) and isinstance(extracted_value, list)
