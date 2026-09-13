@@ -71,6 +71,7 @@ def validate_gold(
     id_field: str | None = None,
     warn_missing: bool = True,
     strict_types: bool = False,
+    allow_extra_fields: bool = False,
 ) -> None:
     """Validate gold data against an eval schema.
 
@@ -107,10 +108,13 @@ def validate_gold(
             hand-written schemas where the declared types are a real constraint;
             leave off for inferred schemas (where the type is only a hint) and
             for fields whose comparator deliberately coerces types.
+        allow_extra_fields: When True, gold fields absent from the schema emit
+            a warning instead of raising. Scoring reports them as skipped.
 
     Raises:
-        GoldValidationError: if gold contains fields not defined in the schema,
-            or (when ``strict_types``) a gold value is not a declared type.
+        GoldValidationError: if gold contains fields not defined in the schema
+            and ``allow_extra_fields`` is False, or (when ``strict_types``) a
+            gold value is not a declared type.
         SchemaError: if the schema itself is invalid (checked first).
     """
     tree = parse_eval_schema(schema)
@@ -138,7 +142,15 @@ def validate_gold(
             record_id: str | int = raw_id
         else:
             record_id = i
-        _validate_node(tree, g, record_id, warn_missing, ignore_keys, strict_types)
+        _validate_node(
+            tree,
+            g,
+            record_id,
+            warn_missing,
+            ignore_keys,
+            strict_types,
+            allow_extra_fields,
+        )
 
 
 def _validate_node(
@@ -148,6 +160,7 @@ def _validate_node(
     warn_missing: bool,
     ignore_keys: set[str] | None = None,
     strict: bool = False,
+    allow_extra_fields: bool = False,
 ) -> None:
     """Recursively validate a gold value against a schema node."""
     if gold_value is None:
@@ -204,16 +217,13 @@ def _validate_node(
 
         schema_fields: set[str] = set()
         for child in node.children:
-            field_name = (
-                child.path.rsplit(".", 1)[-1]
-                if "." in child.path
-                else child.path
-            )
+            field_name = child.name
             schema_fields.add(field_name)
             if field_name in gold_value:
                 _validate_node(
                     child, gold_value[field_name], record_id,
                     warn_missing, strict=strict,
+                    allow_extra_fields=allow_extra_fields,
                 )
             elif warn_missing:
                 logger.warning(
@@ -236,6 +246,14 @@ def _validate_node(
                 )
             if key not in schema_fields and key not in skip:
                 path = f"{node.path}.{key}" if node.path else key
+                if allow_extra_fields:
+                    logger.warning(
+                        "Record %r: gold field '%s' is not in the schema and "
+                        "will be skipped during scoring.",
+                        record_id,
+                        path,
+                    )
+                    continue
                 raise GoldValidationError(
                     f"Record {record_id!r}: field '{path}' is in gold but "
                     f"not in schema. All gold fields must be defined in the "
@@ -260,4 +278,5 @@ def _validate_node(
         for item in gold_value:
             _validate_node(
                 items_node, item, record_id, warn_missing, strict=strict,
+                allow_extra_fields=allow_extra_fields,
             )

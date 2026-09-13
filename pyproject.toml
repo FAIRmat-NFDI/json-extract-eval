@@ -9,7 +9,7 @@ packages = ["src/struct_extract_eval"]
 name = "struct-extract-eval"
 version = "0.1.0"
 description = "Domain-agnostic benchmark for evaluating LLM JSON extraction"
-requires-python = ">=3.10"
+requires-python = ">=3.11"
 dependencies = [
     "jsonref>=1.1.0",
     "jsonschema>=4.0",
@@ -38,7 +38,7 @@ dev = [
 ]
 
 [tool.ruff]
-target-version = "py310"
+target-version = "py311"
 line-length = 99
 
 [tool.ruff.lint]
@@ -46,7 +46,7 @@ select = ["E", "F", "W", "I", "UP", "B", "SIM", "RUF"]
 
 [tool.mypy]
 strict = true
-python_version = "3.10"
+python_version = "3.11"
 warn_return_any = true
 warn_unused_configs = true
 mypy_path = "src"

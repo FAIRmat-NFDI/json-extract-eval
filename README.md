@@ -133,16 +133,23 @@ Run-level metrics (`mean_precision`, `mean_recall`, `mean_f1`) are the arithmeti
 | Yes | Yes | No | **Omission** -- penalizes recall |
 | Yes | No | Yes | **Hallucination** -- penalizes precision |
 | Yes | No | No | Nothing -- field doesn't exist for this record |
-| No | -- | Yes | **Hallucination** -- extractor invented an unknown field |
-| No | -- | No | Nothing -- invisible to the evaluator |
+| No | Yes | Yes/No | **Skipped** -- no comparator exists; excluded from metrics |
+| No | No | Yes | **Hallucination** -- extractor invented an unknown field |
+| No | No | No | Nothing -- field doesn't exist for this record |
 
-**Important:** All gold fields must be defined in the eval schema, so the evaluator knows
+**Important:** By default, all gold fields must be defined in the eval schema, so the evaluator knows
 how to score them. A gold instance can omit a field that is in the schema (it simply won't
 be scored for that record). `validate_gold()` raises an error if gold has fields not in
-the schema. Property names containing `.` are rejected because dots separate nested field
+the schema. Pass `allow_extra_fields=True` to `validate_gold()` when gold records intentionally carry
+unscored metadata. Those fields remain visible with `status="skipped"` and a diagnostic
+reason, whether or not the extractor also returned them.
+Property names containing `.` are rejected because dots separate nested field
 paths in evaluation output. Gold property names are checked during the existing
 schema traversal, before reporting an unknown field; comparator-owned values
 remain opaque to structural validation.
+
+
+
 
 ---
 
@@ -217,8 +224,7 @@ Write a function that takes `(gold, extracted, params)` and returns a `Comparato
 then register it:
 
 ```python
-from struct_extract_eval.core.comparators.registry import register
-from struct_extract_eval.core.comparators.comparator import ComparatorResult
+from struct_extract_eval import ComparatorResult, register
 
 def compare_date(gold, extracted, params):
     """Compare dates regardless of format."""

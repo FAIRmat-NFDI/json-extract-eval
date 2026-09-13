@@ -57,6 +57,9 @@ class SchemaNode:
 
     path: str  # field path
     json_type: str
+    # Key of this node in its parent: property name for object children,
+    # "[]" for array items, "" for the root.
+    name: str = ""
     comparator: ComparatorSpec = field(default_factory=ComparatorSpec)
     children: list["SchemaNode"] = field(default_factory=list)
     skip: bool = False
@@ -277,7 +280,7 @@ def _resolve_transform_specs(
     return specs
 
 
-def _build_node(schema: dict[str, object], path: str) -> SchemaNode:
+def _build_node(schema: dict[str, object], path: str, name: str = "") -> SchemaNode:
     """Recursively build a SchemaNode tree from a resolved eval schema."""
     _validate_xeval(schema, path)
 
@@ -302,13 +305,14 @@ def _build_node(schema: dict[str, object], path: str) -> SchemaNode:
     transforms = _resolve_transform_specs(schema, path)
 
     children = [
-        _build_node(child_schema, child_path)
-        for _name, child_schema, child_path in get_children(schema, path)
+        _build_node(child_schema, child_path, child_name)
+        for child_name, child_schema, child_path in get_children(schema, path)
     ]
 
     node = SchemaNode(
         path=path,
         json_type=json_type,
+        name=name,
         comparator=comparator,
         children=children,
         transforms=transforms,

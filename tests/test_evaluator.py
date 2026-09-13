@@ -26,6 +26,26 @@ class TestEvaluate:
         assert run.mean_f1 == 1.0
         assert run.total_records == 1
 
+    def test_matching_gold_field_outside_schema_does_not_reduce_precision(self) -> None:
+        schema = _eval_schema({
+            "type": "object",
+            "properties": {"name": {"type": "string"}},
+        })
+        gold = [{"name": "Alice", "provenance": "annotator-1"}]
+        extracted = [{"name": "Alice", "provenance": "annotator-1"}]
+
+        run = evaluate(gold, extracted, schema=schema)
+        skipped = [
+            result
+            for result in run.records[0].field_results
+            if result.status == "skipped"
+        ]
+
+        assert run.mean_precision == 1.0
+        assert run.mean_recall == 1.0
+        assert run.mean_f1 == 1.0
+        assert [result.path for result in skipped] == ["provenance"]
+
     def test_mismatch(self) -> None:
         schema = _eval_schema({
             "type": "object",

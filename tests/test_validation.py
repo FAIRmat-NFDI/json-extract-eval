@@ -185,6 +185,24 @@ class TestValidateGold:
         with pytest.raises(GoldValidationError, match="not in schema"):
             validate_gold([{"name": "Alice", "extra": "bad"}], schema)
 
+    def test_extra_gold_field_can_be_allowed(
+        self, caplog: pytest.LogCaptureFixture
+    ) -> None:
+        schema = _eval_schema({
+            "type": "object",
+            "properties": {"name": {"type": "string"}},
+        })
+
+        with caplog.at_level(logging.WARNING):
+            validate_gold(
+                [{"name": "Alice", "provenance": "annotator-1"}],
+                schema,
+                allow_extra_fields=True,
+            )
+
+        assert "provenance" in caplog.text
+        assert "will be skipped" in caplog.text
+
     def test_extra_gold_field_nested_raises(self) -> None:
         """Extra field inside a nested object also raises."""
         schema = _eval_schema({
