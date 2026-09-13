@@ -85,7 +85,7 @@ class Judge(Protocol):
 class GroqJudge:
     """LLM judge backed by Groq's free API.
 
-    Uses the official ``groq`` Python SDK. Default model is Llama 3.3 70B.
+    Uses the official ``groq`` Python SDK. Default model is ``openai/gpt-oss-120b``.
     The API key is read from ``GROQ_API_KEY`` unless passed explicitly.
 
     Caching: in-memory dict keyed by ``(model, path, gold_str, extracted_str)``.
@@ -97,7 +97,7 @@ class GroqJudge:
 
     def __init__(
         self,
-        model: str = "llama-3.3-70b-versatile",
+        model: str = "openai/gpt-oss-120b",
         api_key: str | None = None,
         prompt_template: str | None = None,
     ):

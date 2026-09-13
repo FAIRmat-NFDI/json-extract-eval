@@ -199,15 +199,15 @@ Built-in comparators (registered by default):
 
 | Comparator | Use case | Score |
 |------------|----------|-------|
-| `exact` | Booleans, enums, IDs, short strings | 0 or 1. Strict type and value equality. |
-| `numeric` | Numbers | 0 or 1. Within tolerance = 1, outside = 0. Default: exact equality. |
-| `oneof` | Fields with known acceptable synonyms | 1 if extracted matches any value in list, 0 otherwise. |
+| [`exact`](src/struct_extract_eval/core/comparators/exact.py#L6) | Booleans, enums, IDs, short strings | 0 or 1. Strict type and value equality. |
+| [`numeric`](src/struct_extract_eval/core/comparators/numeric.py#L7) | Numbers | 0 or 1. Within tolerance = 1, outside = 0. Default: exact equality. |
+| [`oneof`](src/struct_extract_eval/core/comparators/oneof.py#L6) | Fields with known acceptable synonyms | 1 if extracted matches any value in list, 0 otherwise. |
 
 Provided batch comparator (must be registered by the user before use):
 
 | Comparator | Use case | Score |
 |------------|----------|-------|
-| `semantic` | Free-text fields (paraphrases, synonyms) | 0 or 1. Uses an LLM judge. Short-circuits on exact string match. See `examples/04_example_semantic`. |
+| [`semantic`](src/struct_extract_eval/batch/semantic_comparator.py#L28) | Free-text fields (paraphrases, synonyms) | 0 or 1. Uses an LLM judge. Short-circuits on exact string match. See `examples/04_example_semantic`. |
 
 Schema examples:
 
@@ -258,7 +258,7 @@ in a record that use them and score them together in one call. Two use cases:
 
 - **LLM judge** (`semantic`): batches multiple free-text fields into one API call for
   cost efficiency and consistency.
-- **Compound comparators**: groups sibling fields (e.g. `surname` + `name`) and scores
+- **Compound comparators** ([`CompoundComparator`](src/struct_extract_eval/core/comparators/comparator.py#L104)): groups sibling fields (e.g. `surname` + `name`) and scores
   them as a unit.
 
 Batch comparators are not registered by default. See `examples/04_example_semantic.ipynb` and
@@ -279,12 +279,12 @@ Transforms receive every value, including `null`: the built-ins below no-op on
 
 | Transform | Params | What it does |
 |-----------|--------|-------------|
-| `lowercase` | -- | Convert to lowercase |
-| `strip` | -- | Strip leading/trailing whitespace |
-| `normalize_whitespace` | -- | Collapse multiple spaces/newlines to single space |
-| `sort_tokens` | -- | Alphabetize whitespace-separated tokens |
-| `round_digits` | `{"digits": int}` | Round numeric value to N decimal places |
-| `type_convert` | `{"to": "float"\|"int"\|"str"\|"bool"}` | Convert value to the given type |
+| [`lowercase`](src/struct_extract_eval/core/transforms/builtins.py#L5) | -- | Convert to lowercase |
+| [`strip`](src/struct_extract_eval/core/transforms/builtins.py#L13) | -- | Strip leading/trailing whitespace |
+| [`normalize_whitespace`](src/struct_extract_eval/core/transforms/builtins.py#L22) | -- | Collapse multiple spaces/newlines to single space |
+| [`sort_tokens`](src/struct_extract_eval/core/transforms/builtins.py#L33) | -- | Alphabetize whitespace-separated tokens |
+| [`round_digits`](src/struct_extract_eval/core/transforms/builtins.py#L44) | `{"digits": int}` | Round numeric value to N decimal places |
+| [`type_convert`](src/struct_extract_eval/core/transforms/builtins.py#L99) | `{"to": "float"\|"int"\|"str"\|"bool"}` | Convert value to the given type |
 
 Schema: `"x-eval-transform": ["strip", "lowercase"]`
 
