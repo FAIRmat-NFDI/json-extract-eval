@@ -134,6 +134,11 @@ def _annotate_node(schema: dict[str, object]) -> None:
             schema["x-eval-compare"] = comparator
         return
 
+    # A container with its own x-eval-compare is scored as one unit. Its
+    # children are never compared, so do not give them defaults.
+    if "x-eval-compare" in schema:
+        return
+
     # Container node (object or array): recurse into children.
     for _field_name, child_schema, _child_path in get_children(schema):
         _annotate_node(child_schema)
