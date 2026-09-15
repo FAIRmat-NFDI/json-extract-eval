@@ -377,7 +377,7 @@ Config syntax: both `x-eval-compare` and `x-eval-transform` entries use the same
 
 - `{"type": "string"}` -- a normal single-type field.
 - `{"type": ["string", "null"]}` -- nullable; the `null` is dropped, so this is just a `string` field (null is handled by value presence, not type).
-- `{"type": ["string", "object"]}` -- a **polymorphic** field that may take several shapes. It is scored as one value by its comparator (default `exact`; set `x-eval-compare` to a custom comparator that understands all the shapes). It is not scored structurally even if it also declares `properties`/`items`. See `examples/miscellaneous/example_polymorphic_fields.ipynb`.
+- `{"type": ["string", "object"]}` -- a **polymorphic** field that may take several shapes. It is scored as one value by its comparator (default `exact`; set `x-eval-compare` to a custom comparator that understands all the shapes). It is not scored structurally even if it also declares `properties`/`items`. Both `infer_schema` (when the data mixes types at one position) and `resolve_schema_references` (when it collapses an `anyOf` of typed branches) produce this form, and both leave out the inner `properties`/`items` of the object or array shapes, since they would never be scored. See `examples/miscellaneous/example_polymorphic_fields.ipynb`.
 
 ---
 
