@@ -38,8 +38,8 @@ class TestInferSchema:
         self, caplog: pytest.LogCaptureFixture
     ) -> None:
         # A field that is a string in one record and a list in another is
-        # polymorphic. infer_schema picks the first instance's type but warns
-        # so the polymorphism is surfaced (issue #82).
+        # polymorphic. infer_schema emits the sorted list of observed types
+        # (no inner structure) and warns so the polymorphism is surfaced.
         import logging
 
         with caplog.at_level(logging.WARNING):
