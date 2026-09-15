@@ -60,14 +60,17 @@ def infer_schema(values: list[object], path: str = "") -> dict[str, object]:
 
     All-null positions default to ``{"type": "string"}``.
 
-    The inferred type comes from the *first non-null value*. When a position is
-    polymorphic -- its values span more than one JSON type family (e.g.
-    sometimes a string, sometimes a list) -- a warning is logged so the
-    polymorphism is surfaced. The inferred type is then only a hint for
-    comparator assignment; assign an explicit ``x-eval-compare`` to handle the
-    position with a comparator (issue #82). ``path`` labels it in warnings.
+    When a position is polymorphic -- its values span more than one JSON type
+    family (e.g. sometimes a string, sometimes an object) -- the result is a
+    list-valued type such as ``{"type": ["object", "string"]}``, and a warning
+    is logged. This is the same form ``resolve_schema_references`` produces
+    when it collapses an ``anyOf`` of typed branches. A multi-type node is
+    scored as one unit by its comparator, never structurally, so the inner
+    ``properties`` / ``items`` of the object or array shapes are deliberately
+    not included. Assign an explicit ``x-eval-compare`` that understands all
+    the shapes (the default is ``exact``).
 
-    Raises ``ValueError`` if *values* is empty.
+    Otherwise the inferred type comes from the values' single type family.
     """
     if not values:
         raise ValueError("infer_schema requires at least one value")
@@ -76,15 +79,20 @@ def infer_schema(values: list[object], path: str = "") -> dict[str, object]:
     if not present_values:
         return {"type": "string"}
 
-    families = {_type_family(value) for value in present_values}
+    families = sorted({_type_family(value) for value in present_values})
     if len(families) > 1:
         logger.warning(
             "Polymorphic field at '%s': observed multiple JSON types %s across "
-            "records. Inferring from the first; the inferred type is only a "
-            "hint. Assign an explicit x-eval-compare to handle it with a "
-            "comparator.",
-            path or "<root>", sorted(families),
+            "records. Emitting a multi-type schema; it is scored as one unit by "
+            "its comparator (default exact). Assign an x-eval-compare that "
+            "handles all the shapes.",
+            path or "<root>", families,
         )
+        # Sorted, so the result does not depend on record order. No
+        # properties/items: a multi-type node is never scored structurally
+        # (get_children returns nothing for it), and this matches what
+        # resolve_schema_references emits when it collapses an anyOf.
+        return {"type": list(families)}
 
     # The first non-null value decides the inferred type for this position.
     first_type = _json_type(present_values[0])

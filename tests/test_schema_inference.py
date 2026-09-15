@@ -44,10 +44,30 @@ class TestInferSchema:
 
         with caplog.at_level(logging.WARNING):
             schema = infer_schema([{"f": "x"}, {"f": ["a", "b"]}])
-        # type still inferred from the first non-null instance
-        assert schema["properties"]["f"]["type"] == "string"
+        # emitted as a multi-type node, no inner structure
+        assert schema["properties"]["f"] == {"type": ["array", "string"]}
         assert "polymorphic" in caplog.text.lower()
         assert "f" in caplog.text
+
+    def test_polymorphic_field_is_a_sorted_type_list(self) -> None:
+        schema = infer_schema([{"q": "35 nm"}, {"q": 35}, {"q": {"value": 35}}])
+        assert schema["properties"]["q"] == {"type": ["number", "object", "string"]}
+
+    def test_polymorphic_result_does_not_depend_on_record_order(self) -> None:
+        records = [{"q": "35 nm"}, {"q": 35}, {"q": {"value": 35, "unit": "nm"}}]
+        assert infer_schema(records) == infer_schema(list(reversed(records)))
+
+    def test_polymorphic_object_shape_drops_properties(self) -> None:
+        # Same shape resolve_schema_references produces for an anyOf of typed
+        # branches: the node is scored as one unit, so inner structure is dropped.
+        schema = infer_schema([{"q": {"value": 35, "unit": "nm"}}, {"q": "35 nm"}])
+        assert schema["properties"]["q"] == {"type": ["object", "string"]}
+        assert "properties" not in schema["properties"]["q"]
+
+    def test_polymorphic_array_shape_drops_items(self) -> None:
+        schema = infer_schema([{"q": ["a", "b"]}, {"q": "a"}])
+        assert schema["properties"]["q"] == {"type": ["array", "string"]}
+        assert "items" not in schema["properties"]["q"]
 
     def test_no_polymorphic_warning_for_int_and_float(
         self, caplog: pytest.LogCaptureFixture
