@@ -251,6 +251,45 @@ Then in the schema: `"x-eval-compare": {"date": {"formats": ["%Y-%m-%d", "%b %d,
 Use `overwrite=True` to replace an existing registration:
 `register("date", compare_date, overwrite=True)`
 
+### Container Comparators
+
+A comparator can also sit on an **object or array node**. The node is then scored as one
+unit: the comparator receives the whole value on each side (the full dict or list), decides
+however it likes, and returns a single result for that node. Use this when the unit of
+correctness is the whole object, or when the parts you want to compare together live at
+different depths (`person.full_name.surname` and `person.nickname`).
+
+```python
+def compare_person(gold, extracted, params):
+    # gold / extracted are the complete dicts under "person"
+    same_name = gold["full_name"] == extracted["full_name"]
+    same_nick = gold.get("nickname", "").lower() == extracted.get("nickname", "").lower()
+    return ComparatorResult(score=1.0 if same_name and same_nick else 0.0, comparator="person")
+
+register("person", compare_person)
+```
+
+```json
+"person": {
+  "type": "object",
+  "x-eval-compare": "person",
+  "properties": {"full_name": {"type": "object", "properties": {...}}, "nickname": {"type": "string"}}
+}
+```
+
+What this means for everything below that node:
+
+- Its children are never scored individually. Any `x-eval-compare`, `x-eval-transform` or
+  `x-eval-skip` on them is ignored, and they do not need a comparator to parse.
+- The node counts as **one field** in precision, recall and F1. A wrong object is one
+  mismatch; an object missing from extracted is one omission; one that gold lacks is one
+  hallucination. It never expands into per-property results.
+- The comparator receives raw values. Normalisation belongs inside the function.
+
+Contrast with a **compound comparator** (below), which couples a few *sibling* leaves while
+the other fields in the same object keep their own comparators and results. See the last
+section of `examples/05_example_compound.ipynb` for the two side by side.
+
 ### Batch Comparators
 
 Per-field comparators score one field at a time. **Batch comparators** receive all fields
@@ -338,7 +377,7 @@ Config syntax: both `x-eval-compare` and `x-eval-transform` entries use the same
 
 - `{"type": "string"}` -- a normal single-type field.
 - `{"type": ["string", "null"]}` -- nullable; the `null` is dropped, so this is just a `string` field (null is handled by value presence, not type).
-- `{"type": ["string", "object"]}` -- a **polymorphic** field that may take several shapes. It is scored as one value by its comparator (default `exact`; set `x-eval-compare` to a custom comparator that understands all the shapes). It is not scored structurally even if it also declares `properties`/`items`. See `examples/08_example_polymorphic.ipynb`.
+- `{"type": ["string", "object"]}` -- a **polymorphic** field that may take several shapes. It is scored as one value by its comparator (default `exact`; set `x-eval-compare` to a custom comparator that understands all the shapes). It is not scored structurally even if it also declares `properties`/`items`. See `examples/miscellaneous/example_polymorphic_fields.ipynb`.
 
 ---
 
@@ -395,7 +434,11 @@ Step-by-step Jupyter notebooks in `examples/`:
 | `02_example_customize` | Customizing the eval schema (oneof, tolerance, transforms, skip, custom comparator) |
 | `03_example_arrays` | Array alignment (ordered, key-field, Hungarian) |
 | `04_example_semantic` | Batch comparators and the LLM semantic judge |
-| `05_example_compound` | Compound comparators (grouping sibling fields) |
+| `05_example_compound` | Compound comparators (grouping sibling fields), and when to use a container comparator instead |
+| `06_example_postprocess` | Post-processing: null and empty-value policy with `reclassify_nulls` |
+| `07_example_empty_values` | Empty values: transforms, a nullable comparator, and the post-handler side by side |
+| `miscellaneous/example_polymorphic_fields` | Polymorphic (multi-type) fields and resolving `anyOf` schemas |
+| `miscellaneous/example_type_defaults` | Changing the default comparator for a whole JSON type with `set_type_default` |
 
 ---
 
