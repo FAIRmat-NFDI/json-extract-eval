@@ -20,8 +20,8 @@ untouched.
 
 Usage::
 
-    from struct_extract_eval.postprocess import propagate_batch_errors
-    from struct_extract_eval import evaluate
+    from json_extract_eval.postprocess import propagate_batch_errors
+    from json_extract_eval import evaluate
 
     result = evaluate(
         gold, extracted, schema,
@@ -30,7 +30,7 @@ Usage::
 
 Or combine with null handling::
 
-    from struct_extract_eval.postprocess import (
+    from json_extract_eval.postprocess import (
         NullHandling, reclassify_nulls, propagate_batch_errors,
     )
 
@@ -42,7 +42,7 @@ Or combine with null handling::
     result = evaluate(gold, extracted, schema, post_process=my_post_process)
 """
 
-from struct_extract_eval.core.field_result import FieldResult
+from json_extract_eval.core.field_result import FieldResult
 
 
 def propagate_batch_errors(

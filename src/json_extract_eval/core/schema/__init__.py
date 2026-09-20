@@ -8,19 +8,19 @@ Modules:
 - ``validation`` -- validate gold instances against an eval schema
 """
 
-from struct_extract_eval.core.schema.inference import (
+from json_extract_eval.core.schema.inference import (
     collapse_multi_type_anyof,
     infer_schema,
     merge_all_of,
     remove_null_anyof,
     resolve_schema_references,
 )
-from struct_extract_eval.core.schema.tree import (
+from json_extract_eval.core.schema.tree import (
     SchemaError,
     SchemaNode,
     parse_eval_schema,
 )
-from struct_extract_eval.core.schema.utils import (
+from json_extract_eval.core.schema.utils import (
     get_children,
     get_leaf_paths,
     get_node_at_path,
@@ -30,11 +30,11 @@ from struct_extract_eval.core.schema.utils import (
     non_null_types,
     resolve_type,
 )
-from struct_extract_eval.core.schema.validation import (
+from json_extract_eval.core.schema.validation import (
     GoldValidationError,
     validate_gold,
 )
-from struct_extract_eval.core.schema.xeval import (
+from json_extract_eval.core.schema.xeval import (
     annotate_xeval,
     parse_xeval_entry,
     reset_type_defaults,

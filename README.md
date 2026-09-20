@@ -1,4 +1,4 @@
-# Struct Extract Eval
+# JSON Extract Eval
 
 extract-eval gives you per-field precision/recall/F1 for LLM JSON extraction.
 
@@ -46,7 +46,7 @@ Requires Python >= 3.10.
 ## Quick Start
 
 ```python
-from struct_extract_eval import evaluate, infer_schema, annotate_xeval, parse_eval_schema, validate_gold
+from json_extract_eval import evaluate, infer_schema, annotate_xeval, parse_eval_schema, validate_gold
 
 gold = [
     {"method": "sputtering", "temperature": 300, "lab_id": "A1"},
@@ -199,15 +199,15 @@ Built-in comparators (registered by default):
 
 | Comparator | Use case | Score |
 |------------|----------|-------|
-| [`exact`](src/struct_extract_eval/core/comparators/exact.py#L6) | Booleans, enums, IDs, short strings | 0 or 1. Strict type and value equality. |
-| [`numeric`](src/struct_extract_eval/core/comparators/numeric.py#L7) | Numbers | 0 or 1. Within tolerance = 1, outside = 0. Default: exact equality. |
-| [`oneof`](src/struct_extract_eval/core/comparators/oneof.py#L6) | Fields with known acceptable synonyms | 1 if extracted matches any value in list, 0 otherwise. |
+| [`exact`](src/json_extract_eval/core/comparators/exact.py#L6) | Booleans, enums, IDs, short strings | 0 or 1. Strict type and value equality. |
+| [`numeric`](src/json_extract_eval/core/comparators/numeric.py#L7) | Numbers | 0 or 1. Within tolerance = 1, outside = 0. Default: exact equality. |
+| [`oneof`](src/json_extract_eval/core/comparators/oneof.py#L6) | Fields with known acceptable synonyms | 1 if extracted matches any value in list, 0 otherwise. |
 
 Provided batch comparator (must be registered by the user before use):
 
 | Comparator | Use case | Score |
 |------------|----------|-------|
-| [`semantic`](src/struct_extract_eval/batch/semantic_comparator.py#L28) | Free-text fields (paraphrases, synonyms) | 0 or 1. Uses an LLM judge. Short-circuits on exact string match. See `examples/04_example_semantic`. |
+| [`semantic`](src/json_extract_eval/batch/semantic_comparator.py#L28) | Free-text fields (paraphrases, synonyms) | 0 or 1. Uses an LLM judge. Short-circuits on exact string match. See `examples/04_example_semantic`. |
 
 Schema examples:
 
@@ -224,7 +224,7 @@ Write a function that takes `(gold, extracted, params)` and returns a `Comparato
 then register it:
 
 ```python
-from struct_extract_eval import ComparatorResult, register
+from json_extract_eval import ComparatorResult, register
 
 def compare_date(gold, extracted, params):
     """Compare dates regardless of format."""
@@ -297,7 +297,7 @@ in a record that use them and score them together in one call. Two use cases:
 
 - **LLM judge** (`semantic`): batches multiple free-text fields into one API call for
   cost efficiency and consistency.
-- **Compound comparators** ([`CompoundComparator`](src/struct_extract_eval/core/comparators/comparator.py#L104)): groups sibling fields (e.g. `surname` + `name`) and scores
+- **Compound comparators** ([`CompoundComparator`](src/json_extract_eval/core/comparators/comparator.py#L104)): groups sibling fields (e.g. `surname` + `name`) and scores
   them as a unit.
 
 Batch comparators are not registered by default. See `examples/04_example_semantic.ipynb` and
@@ -318,12 +318,12 @@ Transforms receive every value, including `null`: the built-ins below no-op on
 
 | Transform | Params | What it does |
 |-----------|--------|-------------|
-| [`lowercase`](src/struct_extract_eval/core/transforms/builtins.py#L5) | -- | Convert to lowercase |
-| [`strip`](src/struct_extract_eval/core/transforms/builtins.py#L13) | -- | Strip leading/trailing whitespace |
-| [`normalize_whitespace`](src/struct_extract_eval/core/transforms/builtins.py#L22) | -- | Collapse multiple spaces/newlines to single space |
-| [`sort_tokens`](src/struct_extract_eval/core/transforms/builtins.py#L33) | -- | Alphabetize whitespace-separated tokens |
-| [`round_digits`](src/struct_extract_eval/core/transforms/builtins.py#L44) | `{"digits": int}` | Round numeric value to N decimal places |
-| [`type_convert`](src/struct_extract_eval/core/transforms/builtins.py#L99) | `{"to": "float"\|"int"\|"str"\|"bool"}` | Convert value to the given type |
+| [`lowercase`](src/json_extract_eval/core/transforms/builtins.py#L5) | -- | Convert to lowercase |
+| [`strip`](src/json_extract_eval/core/transforms/builtins.py#L13) | -- | Strip leading/trailing whitespace |
+| [`normalize_whitespace`](src/json_extract_eval/core/transforms/builtins.py#L22) | -- | Collapse multiple spaces/newlines to single space |
+| [`sort_tokens`](src/json_extract_eval/core/transforms/builtins.py#L33) | -- | Alphabetize whitespace-separated tokens |
+| [`round_digits`](src/json_extract_eval/core/transforms/builtins.py#L44) | `{"digits": int}` | Round numeric value to N decimal places |
+| [`type_convert`](src/json_extract_eval/core/transforms/builtins.py#L99) | `{"to": "float"\|"int"\|"str"\|"bool"}` | Convert value to the given type |
 
 Schema: `"x-eval-transform": ["strip", "lowercase"]`
 

@@ -1,12 +1,12 @@
 from typing import TypeGuard
 
-from struct_extract_eval.core.comparators.comparator import (
+from json_extract_eval.core.comparators.comparator import (
     BatchComparator,
     Comparator,
 )
-from struct_extract_eval.core.comparators.exact import compare_exact
-from struct_extract_eval.core.comparators.numeric import compare_numeric
-from struct_extract_eval.core.comparators.oneof import compare_oneof
+from json_extract_eval.core.comparators.exact import compare_exact
+from json_extract_eval.core.comparators.numeric import compare_numeric
+from json_extract_eval.core.comparators.oneof import compare_oneof
 
 
 class ComparatorNotFoundError(KeyError):

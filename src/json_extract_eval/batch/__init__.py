@@ -5,14 +5,14 @@ I/O and core scoring depends on it. This package holds only the I/O-bound
 parts.
 """
 
-from struct_extract_eval.batch.llm_judge import (
+from json_extract_eval.batch.llm_judge import (
     DEFAULT_PROMPT_TEMPLATE,
     FakeJudge,
     GroqJudge,
     Judge,
     JudgeItem,
 )
-from struct_extract_eval.batch.semantic_comparator import SemanticBatchComparator
+from json_extract_eval.batch.semantic_comparator import SemanticBatchComparator
 
 __all__ = [
     "DEFAULT_PROMPT_TEMPLATE",

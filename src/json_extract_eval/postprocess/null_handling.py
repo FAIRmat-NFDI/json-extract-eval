@@ -9,8 +9,8 @@ absent, restoring omission/hallucination differentiation.
 
 Usage::
 
-    from struct_extract_eval import evaluate
-    from struct_extract_eval.postprocess import NullHandling, reclassify_nulls
+    from json_extract_eval import evaluate
+    from json_extract_eval.postprocess import NullHandling, reclassify_nulls
 
     config = NullHandling(absent_values=[None, ""], both_absent_skip=True)
     result = evaluate(
@@ -21,7 +21,7 @@ Usage::
 
 from dataclasses import dataclass, field
 
-from struct_extract_eval.core.field_result import FieldResult
+from json_extract_eval.core.field_result import FieldResult
 
 
 @dataclass(frozen=True)

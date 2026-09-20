@@ -12,23 +12,23 @@ comparator since they are scored via their children, not directly.
 import logging
 from dataclasses import dataclass, field
 
-from struct_extract_eval.core.comparators.comparator import ComparatorSpec
-from struct_extract_eval.core.comparators.registry import (
+from json_extract_eval.core.comparators.comparator import ComparatorSpec
+from json_extract_eval.core.comparators.registry import (
     ComparatorNotFoundError,
     get_comparator,
 )
-from struct_extract_eval.core.schema.utils import (
+from json_extract_eval.core.schema.utils import (
     get_children,
     is_leaf,
     non_null_types,
     resolve_type,
 )
-from struct_extract_eval.core.schema.xeval import parse_xeval_entry
-from struct_extract_eval.core.transforms.registry import (
+from json_extract_eval.core.schema.xeval import parse_xeval_entry
+from json_extract_eval.core.transforms.registry import (
     TransformNotFoundError,
     get_transform,
 )
-from struct_extract_eval.core.transforms.transform import TransformSpec
+from json_extract_eval.core.transforms.transform import TransformSpec
 
 logger = logging.getLogger(__name__)
 

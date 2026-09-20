@@ -1,6 +1,6 @@
 import pytest
 
-from struct_extract_eval.core.schema.xeval import (
+from json_extract_eval.core.schema.xeval import (
     _BUILTIN_TYPE_DEFAULTS,
     annotate_xeval,
     parse_xeval_entry,
