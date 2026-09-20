@@ -1,6 +1,7 @@
 """Domain-agnostic benchmark for evaluating LLM JSON extraction."""
 
 from json_extract_eval.core.comparators.comparator import (
+    BatchComparator,
     BatchItem,
     ComparatorResult,
     ComparatorSpec,
@@ -31,6 +32,7 @@ from json_extract_eval.evaluator import evaluate
 from json_extract_eval.postprocess import NullHandling, reclassify_nulls
 
 __all__ = [
+    "BatchComparator",
     "BatchItem",
     "ComparatorResult",
     "ComparatorSpec",
