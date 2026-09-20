@@ -22,6 +22,7 @@ from json_extract_eval.batch.llm_judge import (
 )
 from json_extract_eval.core.comparators.batch import process_batches
 from json_extract_eval.core.comparators.comparator import (
+    BatchComparator,
     BatchItem,
     ComparatorResult,
     CompoundComparator,
@@ -128,8 +129,7 @@ class TestProcessBatches:
 
     def test_dispatches_to_registered_handler(self) -> None:
         # Register a fake batch comparator that returns 1 for all items
-        class AlwaysMatch:
-            is_batch = True
+        class AlwaysMatch(BatchComparator):
             def __call__(self, items: list[BatchItem]) -> list[ComparatorResult | None]:
                 return [ComparatorResult(score=1.0, comparator="always") for _ in items]
         register("always", AlwaysMatch())
@@ -159,8 +159,7 @@ class TestProcessBatches:
         assert results[0].status == "batch_error"
 
     def test_handler_raises_marks_all_batch_error(self) -> None:
-        class Raising:
-            is_batch = True
+        class Raising(BatchComparator):
             def __call__(self, items: list[BatchItem]) -> list[ComparatorResult | None]:
                 raise RuntimeError("nope")
         register("raising", Raising())
@@ -175,8 +174,7 @@ class TestProcessBatches:
         assert all(r.status == "batch_error" for r in results)
 
     def test_short_response_marks_trailing_batch_error(self) -> None:
-        class ShortResponse:
-            is_batch = True
+        class ShortResponse(BatchComparator):
             def __call__(self, items: list[BatchItem]) -> list[ComparatorResult | None]:
                 return [ComparatorResult(score=1.0, comparator="short")]  # only 1
         register("short", ShortResponse())
@@ -192,8 +190,7 @@ class TestProcessBatches:
         assert results[1].status == "batch_error"
 
     def test_extra_results_trimmed(self) -> None:
-        class ExtraResponse:
-            is_batch = True
+        class ExtraResponse(BatchComparator):
             def __call__(self, items: list[BatchItem]) -> list[ComparatorResult | None]:
                 return [
                     ComparatorResult(score=1.0, comparator="extra"),
@@ -216,14 +213,12 @@ class TestProcessBatches:
         # Two different labels in one record -> two separate handler calls
         calls: list[str] = []
 
-        class HandlerA:
-            is_batch = True
+        class HandlerA(BatchComparator):
             def __call__(self, items: list[BatchItem]) -> list[ComparatorResult | None]:
                 calls.append("A")
                 return [ComparatorResult(score=1.0, comparator="A") for _ in items]
 
-        class HandlerB:
-            is_batch = True
+        class HandlerB(BatchComparator):
             def __call__(self, items: list[BatchItem]) -> list[ComparatorResult | None]:
                 calls.append("B")
                 return [ComparatorResult(score=0.0, comparator="B") for _ in items]
@@ -249,8 +244,7 @@ class TestProcessBatches:
 
     def test_skip_flag_sets_status_skipped(self) -> None:
         """ComparatorResult(skip=True) -> process_batches sets status='skipped'."""
-        class SkipHandler:
-            is_batch = True
+        class SkipHandler(BatchComparator):
             def __call__(self, items: list[BatchItem]) -> list[ComparatorResult | None]:
                 return [
                     ComparatorResult(score=1.0, comparator="skipper"),
@@ -385,10 +379,8 @@ class TestEvaluateWithSemanticRegistration:
 # --- non-LLM example: unit-aware comparison ---
 
 
-class QuantityBatchComparator:
+class QuantityBatchComparator(BatchComparator):
     """Example multi-field BatchComparator: pairs sibling 'value' and 'unit' fields."""
-
-    is_batch = True
 
     UNITS_TO_METERS: ClassVar[dict[str, float]] = {
         "m": 1.0, "meter": 1.0, "meters": 1.0,
@@ -1015,3 +1007,58 @@ class TestWholeBatchFailure:
         assert by_path["a"].status == "match"           # short-circuit survived
         assert by_path["b"].status == "batch_error"     # judge failed
         assert result.total_batch_errors == 1
+
+
+# --- BatchComparator is a nominal base class ---
+
+
+class TestBatchComparatorBaseClass:
+    """A comparator is a batch comparator because it inherits BatchComparator.
+
+    The kind is a property of the class, declared once where it is defined.
+    There is no marker attribute to remember.
+    """
+
+    def test_subclass_is_dispatched_as_batch(self) -> None:
+        class AlwaysMatch(BatchComparator):
+            def __call__(self, items: list[BatchItem]) -> list[ComparatorResult | None]:
+                return [ComparatorResult(score=1.0, comparator="always") for _ in items]
+        register("always", AlwaysMatch())
+
+        schema: dict[str, object] = {
+            "type": "object",
+            "properties": {"note": {"type": "string", "x-eval-compare": "always"}},
+        }
+        gold: list[dict[str, object]] = [{"note": "gold"}]
+        extracted: list[dict[str, object]] = [{"note": "different"}]
+        result = evaluate(gold, extracted, schema)
+
+        field = result.records[0].field_results[0]
+        assert field.status == "match"
+        assert field.score == 1.0
+
+    def test_subclass_without_call_cannot_be_instantiated(self) -> None:
+        class NoCall(BatchComparator):
+            pass
+
+        with pytest.raises(TypeError, match="abstract"):
+            NoCall()  # type: ignore[abstract]
+
+    def test_marker_attribute_alone_is_not_a_batch_comparator(self) -> None:
+        """``is_batch = True`` without inheriting no longer opts in."""
+        class MarkerOnly:
+            is_batch = True
+            def __call__(self, items: list[BatchItem]) -> list[ComparatorResult | None]:
+                return [ComparatorResult(score=1.0, comparator="marker") for _ in items]
+        register("marker", MarkerOnly())  # type: ignore[arg-type]
+
+        results = [
+            FieldResult("a", 0.0, "marker", "g", "e", "pending",
+                        gold_compared="g", extracted_compared="e"),
+        ]
+        process_batches(results, _EMPTY_TREE)
+        assert results[0].status == "batch_error"
+
+    def test_builtin_batch_comparators_inherit(self) -> None:
+        assert isinstance(SemanticBatchComparator(FakeJudge()), BatchComparator)
+        assert issubclass(CompoundComparator, BatchComparator)
