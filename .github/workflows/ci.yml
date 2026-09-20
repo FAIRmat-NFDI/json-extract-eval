@@ -29,7 +29,7 @@ jobs:
           python -m pip install --upgrade pip
           python -m pip install -e ".[dev,batch]"
       - name: Run tests
-        run: python -m pytest --cov=struct_extract_eval --cov-report=term-missing
+        run: python -m pytest --cov=json_extract_eval --cov-report=term-missing
 
   # Core must work with only the hard dependencies. This job catches an
   # optional import (groq, pyarrow, ...) accidentally leaking into core.

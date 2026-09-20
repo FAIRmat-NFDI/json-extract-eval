@@ -1,6 +1,6 @@
 import pytest
 
-from struct_extract_eval.core.comparators.comparator import ComparatorResult
+from json_extract_eval.core.comparators.comparator import ComparatorResult
 
 
 def test_defaults() -> None:

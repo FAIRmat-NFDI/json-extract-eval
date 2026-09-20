@@ -1,7 +1,7 @@
 from copy import deepcopy
 
-from struct_extract_eval.core.schema import annotate_xeval, infer_schema
-from struct_extract_eval.evaluator import evaluate
+from json_extract_eval.core.schema import annotate_xeval, infer_schema
+from json_extract_eval.evaluator import evaluate
 
 
 def _eval_schema(resolved: dict[str, object]) -> dict[str, object]:

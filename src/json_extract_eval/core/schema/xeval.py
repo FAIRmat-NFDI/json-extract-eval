@@ -10,7 +10,7 @@ Use ``set_type_default`` to change the default comparator for a JSON type.
 by both ``x-eval-transform`` and ``x-eval-compare``.
 """
 
-from struct_extract_eval.core.schema.utils import get_children, is_leaf, resolve_type
+from json_extract_eval.core.schema.utils import get_children, is_leaf, resolve_type
 
 _BUILTIN_TYPE_DEFAULTS: dict[str, str | dict[str, object]] = {
     "string": "exact",

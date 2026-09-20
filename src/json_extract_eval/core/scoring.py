@@ -10,12 +10,12 @@ maximize total F1.
 import logging
 from typing import Literal
 
-from struct_extract_eval.core.comparators.batch import process_batches
-from struct_extract_eval.core.comparators.registry import get_comparator, is_batch
-from struct_extract_eval.core.field_result import FieldResult
-from struct_extract_eval.core.schema import SchemaNode
-from struct_extract_eval.core.transforms.registry import get_transform
-from struct_extract_eval.core.transforms.transform import TransformSpec
+from json_extract_eval.core.comparators.batch import process_batches
+from json_extract_eval.core.comparators.registry import get_comparator, is_batch
+from json_extract_eval.core.field_result import FieldResult
+from json_extract_eval.core.schema import SchemaNode
+from json_extract_eval.core.transforms.registry import get_transform
+from json_extract_eval.core.transforms.transform import TransformSpec
 
 logger = logging.getLogger(__name__)
 
@@ -266,7 +266,7 @@ def _score_array_hungarian(
     Falls back to ordered matching with a warning if the number of
     pairs exceeds ``_MAX_HUNGARIAN_PAIRS``.
     """
-    from struct_extract_eval.core.record import build_record_result
+    from json_extract_eval.core.record import build_record_result
 
     # _score_node guarantees both sides are real lists before dispatching.
     assert isinstance(gold_value, list) and isinstance(extracted_value, list)

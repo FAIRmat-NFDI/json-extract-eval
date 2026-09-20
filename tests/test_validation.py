@@ -2,7 +2,7 @@ import logging
 
 import pytest
 
-from struct_extract_eval.core.schema import (
+from json_extract_eval.core.schema import (
     GoldValidationError,
     annotate_xeval,
     validate_gold,

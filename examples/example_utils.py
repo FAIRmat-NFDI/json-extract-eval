@@ -9,7 +9,7 @@ replace ``show_run`` with your own loop over ``run.records``.
 
 from collections.abc import Iterable
 
-from struct_extract_eval.core.record import RunResult
+from json_extract_eval.core.record import RunResult
 
 _MAX_VALUE_WIDTH = 40
 

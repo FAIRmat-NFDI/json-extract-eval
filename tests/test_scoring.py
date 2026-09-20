@@ -2,10 +2,10 @@ import logging
 
 import pytest
 
-from struct_extract_eval.core.comparators.comparator import ComparatorResult
-from struct_extract_eval.core.comparators.registry import _clear_registry, register
-from struct_extract_eval.core.schema import annotate_xeval, parse_eval_schema
-from struct_extract_eval.core.scoring import _score_object, score_record
+from json_extract_eval.core.comparators.comparator import ComparatorResult
+from json_extract_eval.core.comparators.registry import _clear_registry, register
+from json_extract_eval.core.schema import annotate_xeval, parse_eval_schema
+from json_extract_eval.core.scoring import _score_object, score_record
 
 
 def _make_schema(raw: dict[str, object]) -> "SchemaNode":  # noqa: F821

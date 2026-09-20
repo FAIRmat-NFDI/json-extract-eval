@@ -7,7 +7,7 @@ RunResult: aggregate metrics across all records, per-field breakdown.
 from dataclasses import dataclass
 from statistics import mean
 
-from struct_extract_eval.core.field_result import FieldResult
+from json_extract_eval.core.field_result import FieldResult
 
 
 @dataclass(frozen=True)

@@ -12,8 +12,8 @@ before running. Typical flow:
 Batch comparators (LLM judge, embedding similarity, etc.) are not included
 by default. Register them yourself before calling evaluate():
 
-    from struct_extract_eval.core.comparators.registry import register
-    from struct_extract_eval.batch import GroqJudge, SemanticBatchComparator
+    from json_extract_eval.core.comparators.registry import register
+    from json_extract_eval.batch import GroqJudge, SemanticBatchComparator
 
     register("semantic", SemanticBatchComparator(GroqJudge()))
     result = evaluate(gold, extracted, eval_schema)
@@ -22,15 +22,15 @@ by default. Register them yourself before calling evaluate():
 from collections.abc import Callable
 from copy import deepcopy
 
-from struct_extract_eval.core.comparators.batch import process_batches
-from struct_extract_eval.core.record import (
+from json_extract_eval.core.comparators.batch import process_batches
+from json_extract_eval.core.record import (
     RunResult,
     build_record_result,
     build_run_result,
 )
-from struct_extract_eval.core.schema import SchemaNode, parse_eval_schema
-from struct_extract_eval.core.field_result import FieldResult
-from struct_extract_eval.core.scoring import score_record
+from json_extract_eval.core.schema import SchemaNode, parse_eval_schema
+from json_extract_eval.core.field_result import FieldResult
+from json_extract_eval.core.scoring import score_record
 
 # Type alias for post-processing hooks
 PostProcess = Callable[[list[FieldResult]], list[FieldResult]]
@@ -91,7 +91,7 @@ def evaluate(
 
             Example::
 
-                from struct_extract_eval.postprocess import (
+                from json_extract_eval.postprocess import (
                     NullHandling, reclassify_nulls,
                 )
 
