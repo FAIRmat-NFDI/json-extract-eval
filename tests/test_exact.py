@@ -1,4 +1,4 @@
-from struct_extract_eval.core.comparators.exact import compare_exact
+from json_extract_eval.core.comparators.exact import compare_exact
 
 
 def test_identical_strings() -> None:

@@ -1,7 +1,7 @@
 import math
 from typing import Any
 
-from struct_extract_eval.core.comparators.comparator import ComparatorResult
+from json_extract_eval.core.comparators.comparator import ComparatorResult
 
 
 def compare_numeric(gold: Any, extracted: Any, params: dict[str, Any]) -> ComparatorResult:

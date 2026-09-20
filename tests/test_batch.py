@@ -11,28 +11,28 @@ from typing import ClassVar
 
 import pytest
 
-from struct_extract_eval.batch import (
+from json_extract_eval.batch import (
     FakeJudge,
     SemanticBatchComparator,
 )
-from struct_extract_eval.batch.llm_judge import (
+from json_extract_eval.batch.llm_judge import (
     JudgeItem,
     _coerce_binary_score,
     _parse_judge_response,
 )
-from struct_extract_eval.core.comparators.batch import process_batches
-from struct_extract_eval.core.comparators.comparator import (
+from json_extract_eval.core.comparators.batch import process_batches
+from json_extract_eval.core.comparators.comparator import (
     BatchItem,
     ComparatorResult,
     CompoundComparator,
 )
-from struct_extract_eval.core.comparators.registry import (
+from json_extract_eval.core.comparators.registry import (
     _clear_registry,
     register,
 )
-from struct_extract_eval.core.schema import SchemaNode
-from struct_extract_eval.core.field_result import FieldResult
-from struct_extract_eval.evaluator import evaluate
+from json_extract_eval.core.schema import SchemaNode
+from json_extract_eval.core.field_result import FieldResult
+from json_extract_eval.evaluator import evaluate
 
 # Minimal empty tree for process_batches tests that don't need real schema params.
 _EMPTY_TREE = SchemaNode(path="", json_type="object", comparator="")
@@ -301,7 +301,7 @@ class TestEvaluateWithSemanticRegistration:
     def test_unregistered_semantic_raises_at_parse(self) -> None:
         # If "semantic" is referenced but no handler is registered, parse_eval_schema
         # raises with the missing comparator name in the message.
-        from struct_extract_eval.core.schema import SchemaError
+        from json_extract_eval.core.schema import SchemaError
         schema: dict[str, object] = {
             "type": "object",
             "properties": {
@@ -313,7 +313,7 @@ class TestEvaluateWithSemanticRegistration:
 
     def test_unregistered_custom_name_raises_with_that_name(self) -> None:
         # The error uses the actual missing comparator name, not a hardcoded "semantic".
-        from struct_extract_eval.core.schema import SchemaError
+        from json_extract_eval.core.schema import SchemaError
         schema: dict[str, object] = {
             "type": "object",
             "properties": {

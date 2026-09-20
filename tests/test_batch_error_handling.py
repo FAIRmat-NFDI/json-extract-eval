@@ -1,7 +1,7 @@
 """Tests for batch error propagation post-processor."""
 
-from struct_extract_eval.core.field_result import FieldResult
-from struct_extract_eval.postprocess import propagate_batch_errors
+from json_extract_eval.core.field_result import FieldResult
+from json_extract_eval.postprocess import propagate_batch_errors
 
 
 class TestPropagateBatchErrors:

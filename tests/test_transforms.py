@@ -3,7 +3,7 @@ from typing import Any
 
 import pytest
 
-from struct_extract_eval.core.transforms.builtins import (
+from json_extract_eval.core.transforms.builtins import (
     transform_lowercase,
     transform_normalize_whitespace,
     transform_round_digits,
@@ -11,7 +11,7 @@ from struct_extract_eval.core.transforms.builtins import (
     transform_strip,
     transform_type_convert,
 )
-from struct_extract_eval.core.transforms.transform import Transform
+from json_extract_eval.core.transforms.transform import Transform
 
 # --- lowercase ---
 
@@ -247,9 +247,9 @@ def test_builtin_transform_none_is_noop(transform: Transform, params: dict[str, 
 
 def test_apply_transforms_passes_none_to_custom_transform() -> None:
     """_apply_transforms must hand None to transforms so they can rewrite it."""
-    from struct_extract_eval.core.scoring import _apply_transforms
-    from struct_extract_eval.core.transforms.registry import _clear_registry, register
-    from struct_extract_eval.core.transforms.transform import TransformSpec
+    from json_extract_eval.core.scoring import _apply_transforms
+    from json_extract_eval.core.transforms.registry import _clear_registry, register
+    from json_extract_eval.core.transforms.transform import TransformSpec
 
     def none_to_empty(value: object, params: dict[str, Any]) -> object:
         return "" if value is None else value

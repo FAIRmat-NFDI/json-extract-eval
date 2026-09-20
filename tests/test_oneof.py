@@ -1,6 +1,6 @@
 import pytest
 
-from struct_extract_eval.core.comparators.oneof import compare_oneof
+from json_extract_eval.core.comparators.oneof import compare_oneof
 
 
 def test_match() -> None:

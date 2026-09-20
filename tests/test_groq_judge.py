@@ -5,7 +5,7 @@ import types
 
 import pytest
 
-from struct_extract_eval.batch.llm_judge import GroqJudge
+from json_extract_eval.batch.llm_judge import GroqJudge
 
 
 class _FakeGroqClient:

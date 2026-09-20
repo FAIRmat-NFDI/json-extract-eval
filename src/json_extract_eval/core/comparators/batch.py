@@ -29,13 +29,13 @@ Batch errors are EXCLUDED from precision/recall/F1, like skipped fields.
 import logging
 import re
 
-from struct_extract_eval.core.comparators.comparator import (
+from json_extract_eval.core.comparators.comparator import (
     BatchItem,
     ComparatorResult,
 )
-from struct_extract_eval.core.comparators.registry import get_comparator, is_batch
-from struct_extract_eval.core.schema import SchemaNode
-from struct_extract_eval.core.field_result import FieldResult
+from json_extract_eval.core.comparators.registry import get_comparator, is_batch
+from json_extract_eval.core.schema import SchemaNode
+from json_extract_eval.core.field_result import FieldResult
 
 logger = logging.getLogger(__name__)
 

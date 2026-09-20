@@ -2,7 +2,7 @@ import logging
 
 import pytest
 
-from struct_extract_eval.core.schema import (
+from json_extract_eval.core.schema import (
     collapse_multi_type_anyof,
     get_node_at_path,
     infer_schema,
@@ -404,7 +404,7 @@ class TestCollapseMultiTypeAnyOf:
         }
 
         with caplog.at_level(
-            logging.WARNING, logger="struct_extract_eval.core.schema.inference"
+            logging.WARNING, logger="json_extract_eval.core.schema.inference"
         ):
             collapsed = collapse_multi_type_anyof(schema)
 

@@ -1,19 +1,19 @@
 """Domain-agnostic benchmark for evaluating LLM JSON extraction."""
 
-from struct_extract_eval.core.comparators.comparator import (
+from json_extract_eval.core.comparators.comparator import (
     BatchItem,
     ComparatorResult,
     ComparatorSpec,
     CompoundComparator,
 )
-from struct_extract_eval.core.comparators.registry import register
-from struct_extract_eval.core.field_result import FieldResult
-from struct_extract_eval.core.record import (
+from json_extract_eval.core.comparators.registry import register
+from json_extract_eval.core.field_result import FieldResult
+from json_extract_eval.core.record import (
     FieldAggregation,
     RecordResult,
     RunResult,
 )
-from struct_extract_eval.core.schema import (
+from json_extract_eval.core.schema import (
     GoldValidationError,
     SchemaNode,
     annotate_xeval,
@@ -25,10 +25,10 @@ from struct_extract_eval.core.schema import (
     set_type_default,
     validate_gold,
 )
-from struct_extract_eval.core.scoring import score_record
-from struct_extract_eval.core.transforms.transform import TransformSpec
-from struct_extract_eval.evaluator import evaluate
-from struct_extract_eval.postprocess import NullHandling, reclassify_nulls
+from json_extract_eval.core.scoring import score_record
+from json_extract_eval.core.transforms.transform import TransformSpec
+from json_extract_eval.evaluator import evaluate
+from json_extract_eval.postprocess import NullHandling, reclassify_nulls
 
 __all__ = [
     "BatchItem",
