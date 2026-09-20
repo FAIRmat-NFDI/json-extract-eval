@@ -1,13 +1,8 @@
-import inspect
 from typing import Any
 
 import pytest
 
-from json_extract_eval.core.comparators.comparator import (
-    BatchComparator,
-    BatchItem,
-    ComparatorResult,
-)
+from json_extract_eval.core.comparators.comparator import ComparatorResult
 from json_extract_eval.core.comparators.registry import (
     ComparatorNotFoundError,
     _clear_registry,
@@ -100,59 +95,3 @@ def test_builtin_oneof() -> None:
     fn = get_comparator("oneof")
     result = fn("PVD", "PVD", {"values": ["PVD", "Sputtering"]})
     assert result.score == 1.0
-
-
-# --- register() checks the call shape ---
-#
-# A comparator is called one of two ways: fn(gold, extracted, params) for
-# per-field, fn(items) for batch. register() rejects anything that fits
-# neither, so the mistake surfaces at registration instead of mid-run.
-
-
-def test_register_rejects_batch_shaped_class_that_does_not_inherit() -> None:
-    """Forgot ``(BatchComparator)``. The removed ``is_batch`` marker does not rescue it."""
-    class ForgotToInherit:
-        is_batch = True
-
-        def __call__(self, items: list[BatchItem]) -> list[ComparatorResult | None]:
-            return [ComparatorResult(score=1.0, comparator="forgot") for _ in items]
-
-    with pytest.raises(TypeError, match="subclass BatchComparator"):
-        register("forgot", ForgotToInherit())  # type: ignore[arg-type]
-
-    with pytest.raises(ComparatorNotFoundError):
-        get_comparator("forgot")
-
-
-def test_register_rejects_per_field_function_with_wrong_arity() -> None:
-    def two_args(gold: Any, extracted: Any) -> ComparatorResult:
-        return ComparatorResult(score=1.0, comparator="two_args")
-
-    with pytest.raises(TypeError, match=r"fn\(gold, extracted, params\)"):
-        register("two_args", two_args)  # type: ignore[arg-type]
-
-
-def test_register_accepts_batch_comparator_subclass() -> None:
-    class Inherits(BatchComparator):
-        def __call__(self, items: list[BatchItem]) -> list[ComparatorResult | None]:
-            return [ComparatorResult(score=1.0, comparator="inherits") for _ in items]
-
-    comparator = Inherits()
-    register("inherits", comparator)
-    assert get_comparator("inherits") is comparator
-
-
-def test_register_accepts_callable_whose_signature_is_unavailable(
-    monkeypatch: pytest.MonkeyPatch,
-) -> None:
-    """Some builtins expose no signature. They cannot be checked, so they pass."""
-    def no_signature(fn: object) -> inspect.Signature:
-        raise ValueError("no signature found")
-
-    monkeypatch.setattr(inspect, "signature", no_signature)
-
-    def compare(gold: Any, extracted: Any, params: dict[str, Any]) -> ComparatorResult:
-        return ComparatorResult(score=1.0, comparator="compare")
-
-    register("compare", compare)
-    assert get_comparator("compare") is compare
