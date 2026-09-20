@@ -9,7 +9,11 @@ Covers:
 
 import pytest
 
-from json_extract_eval.core.comparators.comparator import BatchItem, ComparatorResult
+from json_extract_eval.core.comparators.comparator import (
+    BatchComparator,
+    BatchItem,
+    ComparatorResult,
+)
 from json_extract_eval.core.comparators.registry import _clear_registry, register
 from json_extract_eval.core.schema import (
     SchemaError,
@@ -683,8 +687,7 @@ class TestHungarianWithBatchComparator:
         The fake judge scores 1.0 for exact matches, 0.0 otherwise.
         Hungarian should match gold[0]->ext[1] and gold[1]->ext[0].
         """
-        class FakeBatchComparator:
-            is_batch = True
+        class FakeBatchComparator(BatchComparator):
             name = "fake_semantic"
             def __call__(self, items: list[BatchItem]) -> list[ComparatorResult | None]:
                 results: list[ComparatorResult | None] = []

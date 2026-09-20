@@ -1,5 +1,3 @@
-from typing import TypeGuard
-
 from json_extract_eval.core.comparators.comparator import (
     BatchComparator,
     Comparator,
@@ -14,7 +12,7 @@ class ComparatorNotFoundError(KeyError):
 
 
 # Both Comparator and BatchComparator share the same registry. The dispatcher
-# uses ``is_batch(fn)`` to decide which call protocol to use.
+# uses ``isinstance(fn, BatchComparator)`` to decide which call protocol to use.
 _BUILTIN_COMPARATORS: dict[str, Comparator | BatchComparator] = {
     "exact": compare_exact,
     "numeric": compare_numeric,
@@ -56,15 +54,6 @@ def get_comparator(name: str) -> Comparator | BatchComparator:
     if name in _BUILTIN_COMPARATORS:
         return _BUILTIN_COMPARATORS[name]
     raise ComparatorNotFoundError(f"Unknown comparator: '{name}'")
-
-
-def is_batch(fn: Comparator | BatchComparator) -> TypeGuard[BatchComparator]:
-    """True if the comparator is a BatchComparator (has is_batch=True attribute).
-
-    Typed as TypeGuard so callers can narrow the union after the check:
-    ``if is_batch(fn): fn(items)  # mypy knows fn is BatchComparator``
-    """
-    return getattr(fn, "is_batch", False) is True
 
 
 def _clear_registry() -> None:

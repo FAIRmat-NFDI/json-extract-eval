@@ -11,7 +11,8 @@ import logging
 from typing import Literal
 
 from json_extract_eval.core.comparators.batch import process_batches
-from json_extract_eval.core.comparators.registry import get_comparator, is_batch
+from json_extract_eval.core.comparators.comparator import BatchComparator
+from json_extract_eval.core.comparators.registry import get_comparator
 from json_extract_eval.core.field_result import FieldResult
 from json_extract_eval.core.schema import SchemaNode
 from json_extract_eval.core.transforms.registry import get_transform
@@ -633,7 +634,7 @@ def _score_leaf(
 
     comparator_fn = get_comparator(node.comparator.name)
 
-    if is_batch(comparator_fn):
+    if isinstance(comparator_fn, BatchComparator):
         # Defer: build a provisional FieldResult, mark pending. process_batches
         # will dispatch this to the registered batch handler later.
         # The comparator name identifies which batch handler to use.
