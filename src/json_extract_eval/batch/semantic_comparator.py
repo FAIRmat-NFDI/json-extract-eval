@@ -1,4 +1,4 @@
-"""Semantic batch comparator -- LLM-judge wrapper that fits the BatchComparator protocol.
+"""Semantic batch comparator -- LLM-judge wrapper that subclasses BatchComparator.
 
 Wraps a ``Judge`` (e.g. ``GroqJudge``) into a class that the scoring layer
 can dispatch to like any other comparator. The user registers an instance under
