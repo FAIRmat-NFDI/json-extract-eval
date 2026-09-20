@@ -1062,3 +1062,10 @@ class TestBatchComparatorBaseClass:
     def test_builtin_batch_comparators_inherit(self) -> None:
         assert isinstance(SemanticBatchComparator(FakeJudge()), BatchComparator)
         assert issubclass(CompoundComparator, BatchComparator)
+
+    def test_base_class_is_public(self) -> None:
+        """Users must subclass it, so it is importable from the top-level package."""
+        import json_extract_eval
+
+        assert json_extract_eval.BatchComparator is BatchComparator
+        assert "BatchComparator" in json_extract_eval.__all__
