@@ -18,6 +18,7 @@ import logging
 
 from json_extract_eval.batch.llm_judge import Judge, JudgeItem
 from json_extract_eval.core.comparators.comparator import (
+    BatchComparator,
     BatchItem,
     ComparatorResult,
 )
@@ -25,7 +26,7 @@ from json_extract_eval.core.comparators.comparator import (
 logger = logging.getLogger(__name__)
 
 
-class SemanticBatchComparator:
+class SemanticBatchComparator(BatchComparator):
     """BatchComparator that defers non-exact-match cases to an LLM judge.
 
     For each input item:
@@ -43,8 +44,6 @@ class SemanticBatchComparator:
     on item #2 results in ``results[2] = None`` -- it does NOT shift
     subsequent items, so unrelated fields stay correctly scored.
     """
-
-    is_batch = True
 
     def __init__(self, judge: Judge, name: str = "semantic"):
         self.judge = judge

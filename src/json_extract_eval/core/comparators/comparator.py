@@ -9,6 +9,7 @@ Two kinds of comparator:
 - ``CompoundComparator``: is a special kind of BatchComparator, it compares multiple compound fields.
 """
 
+from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
 from typing import Any, Protocol
 
@@ -72,12 +73,17 @@ class Comparator(Protocol):
     ) -> ComparatorResult: ...
 
 
-class BatchComparator(Protocol):
+class BatchComparator(ABC):
     """Batch comparator. Many fields in, many results out (one per input).
 
-    Implementations are classes that set ``is_batch = True`` as a class
-    attribute. The scoring dispatcher uses this attribute to decide whether
-    to call inline (per-field) or defer to ``process_batches``.
+    Subclass this to write a batch comparator. Inheriting is what marks a
+    comparator as batch: the scoring dispatcher checks
+    ``isinstance(fn, BatchComparator)`` to decide whether to call inline
+    (per-field) or defer to ``process_batches``.
+
+    This is a base class, not a Protocol like ``Comparator``, on purpose. Both
+    kinds are plain callables, so their shape alone cannot tell them apart at
+    runtime. Inheritance states the kind once, where the class is defined.
 
     The returned list MUST be **positional**: same length as ``items``, and
     each entry corresponds to the input item at the same index. Each entry is:
@@ -94,14 +100,13 @@ class BatchComparator(Protocol):
     ``batch_error``.
     """
 
-    is_batch: bool
-
+    @abstractmethod
     def __call__(
         self, items: list[BatchItem],
     ) -> list[ComparatorResult | None]: ...
 
 
-class CompoundComparator:
+class CompoundComparator(BatchComparator):
     """Score multiple sibling fields together as one logical unit.
 
     Problem
@@ -181,8 +186,6 @@ class CompoundComparator:
     name : str
         Comparator name used in ``ComparatorResult.comparator`` and error messages.
     """
-
-    is_batch = True
 
     def __init__(self, fields: list[str], primary: str, name: str = "compound") -> None:
         if primary not in fields:

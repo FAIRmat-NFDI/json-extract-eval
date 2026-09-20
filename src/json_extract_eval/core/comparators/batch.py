@@ -30,10 +30,11 @@ import logging
 import re
 
 from json_extract_eval.core.comparators.comparator import (
+    BatchComparator,
     BatchItem,
     ComparatorResult,
 )
-from json_extract_eval.core.comparators.registry import get_comparator, is_batch
+from json_extract_eval.core.comparators.registry import get_comparator
 from json_extract_eval.core.schema import SchemaNode
 from json_extract_eval.core.field_result import FieldResult
 
@@ -104,9 +105,9 @@ def process_batches(
             _mark_all_error(results)
             continue
 
-        if not is_batch(fn):
+        if not isinstance(fn, BatchComparator):
             logger.error(
-                "Comparator '%s' is not a BatchComparator (no is_batch=True) "
+                "Comparator '%s' does not inherit BatchComparator "
                 "but %d fields were dispatched to it. Marking as batch_error.",
                 name, len(results),
             )
