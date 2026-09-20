@@ -1,3 +1,5 @@
+import inspect
+
 from json_extract_eval.core.comparators.comparator import (
     BatchComparator,
     Comparator,
@@ -37,15 +39,40 @@ def register(
 
     Raises ValueError if a comparator with this name is already registered
     and overwrite is False, or if the name collides with a built-in.
-    Raises TypeError if fn is not callable.
+    Raises TypeError if fn is not callable, or if it fits neither call style:
+    it does not inherit BatchComparator and cannot be called as
+    ``fn(gold, extracted, params)``.
     """
     if not callable(fn):
         raise TypeError(f"Comparator must be callable, got {type(fn).__name__}")
+    # Anything that is not a BatchComparator is called per-field. Check that
+    # call works now, so a batch class that forgot to inherit fails here with
+    # a clear message instead of mid-run with an unrelated TypeError.
+    if not isinstance(fn, BatchComparator) and not _accepts_per_field_call(fn):
+        raise TypeError(
+            f"Comparator '{name}' cannot be called as fn(gold, extracted, params). "
+            f"If it is a batch comparator, subclass BatchComparator."
+        )
     if name in _BUILTIN_COMPARATORS:
         raise ValueError(f"Cannot overwrite built-in comparator '{name}'")
     if not overwrite and name in _registry:
         raise ValueError(f"Comparator '{name}' is already registered")
     _registry[name] = fn
+
+
+def _accepts_per_field_call(fn: Comparator | BatchComparator) -> bool:
+    """True if ``fn(gold, extracted, params)`` is a valid call."""
+    try:
+        signature = inspect.signature(fn)
+    except (ValueError, TypeError):
+        # Some builtins and C extensions expose no signature. They cannot be
+        # checked, so let them through rather than reject a valid comparator.
+        return True
+    try:
+        signature.bind(None, None, {})
+    except TypeError:
+        return False
+    return True
 
 
 def get_comparator(name: str) -> Comparator | BatchComparator:
