@@ -76,18 +76,6 @@ class Comparator(Protocol):
 class BatchComparator(ABC):
     """Batch comparator. Many fields in, many results out (one per input).
 
-    Subclass this to write a batch comparator. Inheriting is what marks a
-    comparator as batch: the scoring dispatcher checks
-    ``isinstance(fn, BatchComparator)`` to decide whether to call inline
-    (per-field) or defer to ``process_batches``.
-
-    This is a base class, not a Protocol like ``Comparator``, on purpose. Both
-    kinds are plain callables, so their shape alone cannot tell them apart at
-    runtime. Inheritance states the kind once, where the class is defined.
-
-    The returned list MUST be **positional**: same length as ``items``, and
-    each entry corresponds to the input item at the same index. Each entry is:
-
     - ``ComparatorResult``: the handler decided this item -- score becomes
       the field's final score, status becomes match/mismatch
     - ``None``: the handler couldn't decide for this item -- ``process_batches``

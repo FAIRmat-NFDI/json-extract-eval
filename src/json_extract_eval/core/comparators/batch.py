@@ -102,7 +102,7 @@ def process_batches(
                 "(at paths %s). Marking %d items as batch_error.",
                 name, [r.path for r in results], len(results),
             )
-            _mark_all_error(results)
+            _mark_all_batch_err(results)
             continue
 
         if not isinstance(fn, BatchComparator):
@@ -111,7 +111,7 @@ def process_batches(
                 "but %d fields were dispatched to it. Marking as batch_error.",
                 name, len(results),
             )
-            _mark_all_error(results)
+            _mark_all_batch_err(results)
             continue
 
         items = []
@@ -135,7 +135,7 @@ def process_batches(
                 "Marking all as batch_error.",
                 name, len(items), [it.path for it in items], exc,
             )
-            _mark_all_error(results)
+            _mark_all_batch_err(results)
             continue
 
         if not isinstance(outputs, list):
@@ -144,7 +144,7 @@ def process_batches(
                 "(expected %d results). Marking all as batch_error.",
                 name, type(outputs).__name__, len(items),
             )
-            _mark_all_error(results)
+            _mark_all_batch_err(results)
             continue
 
         if len(outputs) > len(items):
@@ -195,7 +195,7 @@ def process_batches(
     return field_results
 
 
-def _mark_all_error(results: list[FieldResult]) -> None:
+def _mark_all_batch_err(results: list[FieldResult]) -> None:
     """Mark every FieldResult as batch_error."""
     for r in results:
         r.status = "batch_error"

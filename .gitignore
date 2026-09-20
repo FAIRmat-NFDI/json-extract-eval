@@ -31,3 +31,4 @@ htmlcov/
 .ipynb_checkpoints/
 
 env
+docs/
