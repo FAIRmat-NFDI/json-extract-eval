@@ -2,8 +2,8 @@ from typing import Any
 
 import pytest
 
-from struct_extract_eval.core.comparators.comparator import ComparatorResult
-from struct_extract_eval.core.comparators.registry import (
+from json_extract_eval.core.comparators.comparator import ComparatorResult
+from json_extract_eval.core.comparators.registry import (
     ComparatorNotFoundError,
     _clear_registry,
     get_comparator,

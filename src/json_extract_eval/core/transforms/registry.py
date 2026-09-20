@@ -1,4 +1,4 @@
-from struct_extract_eval.core.transforms.builtins import (
+from json_extract_eval.core.transforms.builtins import (
     transform_lowercase,
     transform_normalize_whitespace,
     transform_round_digits,
@@ -6,7 +6,7 @@ from struct_extract_eval.core.transforms.builtins import (
     transform_strip,
     transform_type_convert,
 )
-from struct_extract_eval.core.transforms.transform import Transform
+from json_extract_eval.core.transforms.transform import Transform
 
 
 class TransformNotFoundError(KeyError):

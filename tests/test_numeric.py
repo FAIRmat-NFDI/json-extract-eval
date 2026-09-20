@@ -1,6 +1,6 @@
 import math
 
-from struct_extract_eval.core.comparators.numeric import compare_numeric
+from json_extract_eval.core.comparators.numeric import compare_numeric
 
 
 def test_exact_match() -> None:

@@ -8,10 +8,10 @@ Built-in post-processors:
 - ``propagate_batch_errors`` -- if any item in a batch failed, taint the whole batch
 """
 
-from struct_extract_eval.postprocess.batch_error_handling import (
+from json_extract_eval.postprocess.batch_error_handling import (
     propagate_batch_errors,
 )
-from struct_extract_eval.postprocess.null_handling import NullHandling, reclassify_nulls
+from json_extract_eval.postprocess.null_handling import NullHandling, reclassify_nulls
 
 __all__ = [
     "NullHandling",

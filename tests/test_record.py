@@ -1,5 +1,5 @@
-from struct_extract_eval.core.field_result import FieldResult
-from struct_extract_eval.core.record import (
+from json_extract_eval.core.field_result import FieldResult
+from json_extract_eval.core.record import (
     RecordResult,
     build_record_result,
     build_run_result,

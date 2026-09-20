@@ -21,7 +21,7 @@ Run before evaluation so issues surface early.
 
 import logging
 
-from struct_extract_eval.core.schema.tree import SchemaNode, parse_eval_schema
+from json_extract_eval.core.schema.tree import SchemaNode, parse_eval_schema
 
 logger = logging.getLogger(__name__)
 

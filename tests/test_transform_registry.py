@@ -2,7 +2,7 @@ from typing import Any
 
 import pytest
 
-from struct_extract_eval.core.transforms.registry import (
+from json_extract_eval.core.transforms.registry import (
     TransformNotFoundError,
     _clear_registry,
     get_transform,

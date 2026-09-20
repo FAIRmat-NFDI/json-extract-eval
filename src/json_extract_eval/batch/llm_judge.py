@@ -126,7 +126,7 @@ class GroqJudge:
         except ImportError as exc:
             raise ImportError(
                 "GroqJudge requires the 'groq' package. "
-                "Install with: pip install 'struct-extract-eval[batch]'"
+                "Install with: pip install 'json-extract-eval[batch]'"
             ) from exc
 
         self.model = model

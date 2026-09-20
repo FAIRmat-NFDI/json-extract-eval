@@ -5,8 +5,8 @@ can dispatch to like any other comparator. The user registers an instance under
 the name ``"semantic"`` (or any name they like) and schemas reference it via
 ``x-eval-compare``:
 
-    from struct_extract_eval.core.comparators.registry import register
-    from struct_extract_eval.batch import GroqJudge, SemanticBatchComparator
+    from json_extract_eval.core.comparators.registry import register
+    from json_extract_eval.batch import GroqJudge, SemanticBatchComparator
 
     register("semantic", SemanticBatchComparator(GroqJudge()))
 
@@ -16,8 +16,8 @@ for trivially equal pairs -- this is the highest-leverage optimization.
 
 import logging
 
-from struct_extract_eval.batch.llm_judge import Judge, JudgeItem
-from struct_extract_eval.core.comparators.comparator import (
+from json_extract_eval.batch.llm_judge import Judge, JudgeItem
+from json_extract_eval.core.comparators.comparator import (
     BatchItem,
     ComparatorResult,
 )

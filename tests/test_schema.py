@@ -2,15 +2,15 @@ import logging
 
 import pytest
 
-from struct_extract_eval.core.comparators.comparator import ComparatorSpec
-from struct_extract_eval.core.schema import (
+from json_extract_eval.core.comparators.comparator import ComparatorSpec
+from json_extract_eval.core.schema import (
     SchemaError,
     SchemaNode,
     annotate_xeval,
     parse_eval_schema,
 )
-from struct_extract_eval.core.schema.tree import _validate_xeval
-from struct_extract_eval.core.transforms.transform import TransformSpec
+from json_extract_eval.core.schema.tree import _validate_xeval
+from json_extract_eval.core.transforms.transform import TransformSpec
 
 # --- SchemaError ---
 
